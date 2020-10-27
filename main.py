@@ -5,25 +5,36 @@ import dotenv
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
-client = commands.AutoShardedBot(command_prefix='am.',
-                                 intents=discord.Intents.all())  # To create an instance of class commands.Bot
 dotenv.load_dotenv("config.env")
 
 # Mongodb instance
 mongo_client = AsyncIOMotorClient(
     'xxx')
 db = mongo_client['manager']
+
+
+async def get_prefix(bot, message):
+    get = await db['prefixes'].find_one({
+        "guild_id": message.guild.id
+    })
+    prefix = get['prefix']
+    return prefix
+
+
+client = commands.AutoShardedBot(command_prefix=get_prefix,
+                                 intents=discord.Intents.all(),
+                                 activity=discord.Game(name="Among Us"))
+
+# Store MongoDB connection in a bot variable.
 client.db = db
 
 
-
-@client.event
-async def on_ready():
-    print(f"Client {client.user}\n"
-          f"ID: {client.user.id}")
+@client.command()
+async def test(ctx):
+    await ctx.send(get_prefix)
 
 
-# Load all of the cogs
+# Load all cogs
 if __name__ == "__main__":
     for filename in os.listdir('cogs'):
         if filename.endswith('.py') and not filename.startswith('-'):
