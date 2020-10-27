@@ -21,17 +21,10 @@ async def get_prefix(bot, message):
     return prefix
 
 
-client = commands.AutoShardedBot(command_prefix=get_prefix,
-                                 intents=discord.Intents.all(),
-                                 activity=discord.Game(name="Among Us"))
+client = commands.AutoShardedBot(command_prefix=get_prefix, intents=discord.Intents.all(), activity=discord.Game(name="Among Us"))
 
 # Store MongoDB connection in a bot variable.
 client.db = db
-
-
-@client.command()
-async def test(ctx):
-    await ctx.send(get_prefix)
 
 
 # Load all cogs
